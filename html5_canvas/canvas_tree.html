@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>canvas实现的生长的数</title>
+    <style>
+        body{
+        }
+        #tree{
+            background-color: #eeffee;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="tree" width="800px" height="500px">您的浏览器不支持 canvas 标签</canvas>
+    <script>
+        window.onload=function(){
+            var tree=document.getElementById("tree");
+            var ctx=tree.getContext('2d');
+            //drawTree(ctx,100,tree.height-50,60,-Math.PI/2,10,7);
+            drawTree(ctx,tree.width/2,tree.height-50,60,-Math.PI/2,12,13);
+        }
+        /**
+         * [drawTree description]
+         * @param ctx             [画布]
+         * @param startX          [树的起始 x 坐标]
+         * @param startY          [树的起始 y 坐标]
+         * @param length          [树干长度]
+         * @param angle           [树干方向，以坐标轴x轴正方向为0度]
+         * @param depth           [树干的节数]
+         * @param branchwidth     [树干宽度]
+         */
+        function drawTree(ctx,startX,startY,length,angle,depth,branchwidth){
+             var newLength,newAngle,newDepth,maxBranch= 3,endX,endY,maxAngle=Math.PI/ 4;
+             var subBranches;          /* 树枝数量 */
+             ctx.beginPath();          /* beginPath() 方法在一个画布中开始子路径的一个新的集合 */
+             ctx.moveTo(startX,startY);  /* 把路径移动到画布中的指定点，不创建线条*/
+             endX=startX+length*Math.cos(angle);
+             endY=startY+length*Math.sin(angle);
+             ctx.lineCap="round";      /* 设置线条的结束端点样式 帽式 */
+             ctx.lineWidth=branchwidth; /* 设置当前的线条宽度 */
+             ctx.lineTo(endX,endY);      /*  添加一个新点，然后在画布中创建从该点到最后指定点的线条 */
+             if(depth<=2){
+                //ctx.strokeStyle='rgb(237,'+parseInt(((rand()*64)+100))+',65)';
+                ctx.strokeStyle='rgb(0,'+parseInt(((Math.random()*64)+128))+',0)';  /*颜色用了随机数，这样使颜色看起来有深有浅，比较符合实际 */
+             }else{
+                ctx.strokeStyle='rgb('+parseInt(((Math.random()*64)+64))+',50,25)'; /*颜色用了随机数，这样使颜色看起来有深有浅，比较符合实际 */
+             }
+             ctx.stroke();              /*绘制已定义的路径 */
+             newDepth = depth-1;
+             if(!newDepth){
+                 return ;
+             }
+             subBranches = Math.random()*(maxBranch-1)+1;                     /* 定义树枝的数量 */
+             branchwidth *=0.7;                                        /* 重新赋值树干宽度为原来的0.7倍 */
+             setTimeout(function(){
+                 for(var i=0;i<subBranches;i++){
+                     newAngle = angle +Math.random()*maxAngle*2-maxAngle;      /* 新的树枝角度 */
+                     newLength = length*(0.7+Math.random()*0.3);
+                     drawTree(ctx,endX,endY,newLength,newAngle,newDepth,branchwidth);
+                 }
+             },20);                                                     /* 20ms后进行下一次循环 */
+         }
+    </script>
+</body>
+</html>

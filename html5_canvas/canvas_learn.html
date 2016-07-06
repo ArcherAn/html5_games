@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>canvas学习_正多边形绘图</title>
+    <style>
+       body{
+           margin: 0px;
+           height: 100%;
+       }
+        .style_sets{
+            width: 500px;
+            margin: 0 auto;
+            font-size:16px;
+            margin-top: 20px;
+            text-align: center;
+        }
+        .style_sets span{
+            margin-right: 14px;
+        }
+       .canvasWrap{
+            text-align: center;
+        }
+        #canvas1{
+            background-color: #eeeeee;
+            margin: 10px auto;
+        }
+
+    </style>
+</head>
+<body>
+     <div class="style_sets">
+         <span>Side:<input id="polygon_side" type="number" min="3" max="10"></span>
+         <span>angle:<input id="polygon_angle" type="number" min="0" max="360"/></span>
+         <button id="erase_all">Erase All</button>
+     </div>
+     <div class="canvasWrap">
+        <canvas id="canvas1" width="500px" height="480px"></canvas>
+     </div>
+    <script>
+      window.onload=function(){
+          var sideDOM = document.getElementById('polygon_side');
+          var angleDOM = document.getElementById('polygon_angle');
+          var eraseAllDOM = document.getElementById('erase_all');
+          var can = document.getElementById('canvas1');
+          var ctx = can.getContext('2d');
+
+          var drawingSurfaceData;
+          var curentObj;
+          init();
+
+          function init(){
+            ctx.lineWidth=1;                /* 线条的粗细 */
+            sideDOM.value = 3;              /* 设置默认值 */
+            angleDOM.value = 90;
+            sideDOM.onblur = numberBlur;
+            angleDOM.onblur = numberBlur;
+
+              eraseAllDOM.onclick=function(){
+                  ctx.clearRect(0,0,can.width,can.height);
+              };
+
+              can.onmousedown=function(e){            /* 鼠标按下时触发 */
+                  e = e || window.event;
+                  var x = e.offsetX || e.layerX;
+                  var y = e.offsetY || e.layerY;
+                  drawingSurfaceData = saveDrawingSurface();           /* 保存画布数据 */
+                  var options = {
+                      x : x,
+                      y : y,
+                      radius : 0,                                 /* 表示距离 */
+                      side : sideDOM.value,
+                      stratAngle : angleDOM.value
+                  };
+                  curentObj = new Polygon(options);    /* 定义一个多边形 */
+              };
+              can.onmousemove=function(e){
+                  if(!curentObj) return false;
+                  e = e || window.event;
+                  var x = e.offsetX || e.layerX;
+                  var y = e.offsetY || e.layerY;
+                  ctx.clearRect(0,0,can.width,can.height);
+                  curentObj.radius = count2PointDistance(curentObj.x,curentObj.y,x,y);    /* 计算两点之间的距离 */
+                  restoreDrawingSurface(drawingSurfaceData);                     /* 恢复画布数据 */
+                  curentObj.stroke(ctx);                                        /* stroke() 绘制当前路径 */
+              };
+              can.onmouseup=function(){
+                  curentObj=null;
+              };
+              /* 简单的限制数字输入框，当输入不为数字时，失去焦点回到最小值 */
+              function numberBlur(){
+                  var val =this.value;
+                  var max=Number(this.max);
+                  var min=Number(this.min);
+                  if(val === '' || val<min || val>max ||/\D/g.test(val)){
+                      this.value = min;
+                  }
+              }
+          }
+
+          function Polygon(opts){                /* 多边形对象 */
+              this.x= opts.x || 0;
+              this.y = opts.y || 0;
+              this.side= opts.side || 3;
+              this.radius=opts.radius || 20;
+              this.stratAngle=opts.stratAngle ||0;
+          }
+          Polygon.prototype={
+              constructor : Polygon,
+              getPoints: function(){
+                  var points = [];
+                  var angle = (Math.PI/180)*this.stratAngle;
+                  for(var i=0;i<this.side;i++){
+                      var point ={
+                          x:0,
+                          y:0
+                      }
+                      point.x = this.x + this.radius*Math.cos(angle);
+                      point.y = this.y - this.radius*Math.sin(angle);
+                      points.push(point);
+                      angle += 2*Math.PI/this.side;
+                  }
+                  return points;
+              },
+              createPath : function(context){
+                  var points = this.getPoints();
+                  context.beginPath();
+                  context.moveTo(points[0].x,points[0].y);
+                  for(var i=1;i<this.side;i++){
+                      context.lineTo(points[i].x,points[i].y);
+                  }
+                  context.closePath();
+                  return this;
+              },
+              stroke : function(context){                            /* stroke() 绘制当前路径 */
+                  context.save();
+                  this.createPath(context);
+                  context.strokeStyle = '#64e39d';
+                  context.stroke();
+                  context.restore();                               /* restore() 方法将绘图状态置为保存值*/
+              },
+              fill : function(){                                /* 此函数去除没关系 */
+                  context.save();
+                  this.createPath();
+                  context.fillStyle = '#64e39d';
+                  context.fill();
+                  context.restore();
+              }
+          }
+          /*保存画布数据 */
+          function saveDrawingSurface(){
+              return ctx.getImageData(0,0,can.width,can.height);
+          }
+          /*恢复画布数据 */
+          function restoreDrawingSurface(data){
+              if(!data) return false;
+              ctx.putImageData(data,0,0);       /* putImageData() 方法将图像数据（从指定的 ImageData 对象）放回画布上。 */
+          }
+          /* 计算两点之间的距离 */
+          function count2PointDistance(x1,y1,x2,y2){
+              return Math.sqrt(Math.pow(x2-x1,2)+Math.pow(y2-y1,2));
+          }
+      }
+
+    </script>
+</body>
+</html>
