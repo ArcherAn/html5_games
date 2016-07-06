@@ -1,6 +1,18 @@
 
-## **html5实现的简单小树** ##
+## **canvas实现鼠标拖拽画正多边形** ##
+**先上图：**
 
+![](http://i.imgur.com/tLrkD4D.png)<br>
+
+- 实现在画布上点击拖拽鼠标画出正多边形效果。<br>
+- 在页面数字输入框中输入多边形的边数，以及起始的角度 [0 - 360] 。<br>
+- Erase All 按钮点击可以清除画布内容。<br>
+
+**1、**此效果中用到了canvas 中的 getImageData 和 putImageData 方法：getImageData(x,y,width,height)  复制画布上指定矩形的像素数据， putImageData(data,x,y,w,h) 恢复数据。<br>
+**2、**鼠标按下时，利用  getImageData 先保存画布数据。 鼠标 move时，先用 putImageData 恢复数据。这样就能保证画布上已经画好的图一直存在。<br>
+**3、**鼠标 move时，多边形的大小根据鼠标移动的距离变化，主要是在 onmousemove 事件中获取到鼠标距离，这个距离就是多边形的半径。<br>
+
+## **html5实现的简单小树** ##
 这个效果是用递归的方式，不断画出线条组成一棵简单的小树。<br>
 **先上图：**
 
