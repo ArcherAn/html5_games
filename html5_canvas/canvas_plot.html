@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>使用canvas绘制很多复杂的图形</title>
+    <style>
+        body{}
+        .plot_area{
+            width:100%;
+            height: 100%;
+        }
+    </style>
+</head>
+<body>
+     <div class="plot_area">
+         <canvas id="can1" width="400" height="350" style="background: #fc0">浏览器不支持canvas</canvas>
+         <canvas id="can2" width="400" height="350" style="background: goldenrod">浏览器不支持canvas</canvas>
+         <canvas id="can3" width="400" height="350" style="background: goldenrod">浏览器不支持canvas</canvas>
+     </div>
+     <script type="text/javascript">
+         //直线版
+         var canvas1 = document.getElementById("can1");
+         var cxt1 = canvas1.getContext("2d");
+         var dx = 150;
+         var dy = 150;
+         var s = 100;
+         cxt1.beginPath();                                 //起始一条路径
+         cxt1.fillStyle = 'rgb(100,255,100)';          //设置填充绘画的颜色、渐变或模式
+         cxt1.strokeStyle = 'rgb(0,0,100)';            //设置笔触的颜色、渐变或模式
+         var x = Math.sin(0);
+         var y = Math.cos(0);
+         var dig = Math.PI/ 15 * 11;
+         for(var i = 0;i<30;i++){                       //将整个绘图分为30等份，以圆心中心为起始基础点，从y轴负方向最下图开始逆时针绘图
+             var x = Math.sin(i*dig);
+             var y = Math.cos(i*dig);
+             cxt1.lineTo(dx+x*s,dy+y*s);                //添加一个新点，然后在画布中创建从该点到最后指定点的线条
+         }
+         cxt1.closePath();                                //创建从当前点回到起始点的路径
+         cxt1.fill();                                     //填充当前绘图或路径
+         cxt1.stroke();                                   //绘制已定义的路径
+
+        //渐变图形，线性渐变
+         var canvas2 = document.getElementById("can2");
+         var cxt2 = canvas2.getContext("2d");
+         var g1 = cxt2.createLinearGradient(0,0,0,400);
+         g1.addColorStop(0,'rgb(255,255,0)');
+         g1.addColorStop(1,'rgb(0,255,255)');
+         cxt2.fillStyle = g1;
+         cxt2.fillRect(0, 0, 400, 350);
+         var n = 0;
+         var g2 = cxt2.createLinearGradient(0,0,400,0);
+         g2.addColorStop(0,'rgba(0,0,255,0.5)');
+         g2.addColorStop(1,'rgba(255,0,0,0.5)');      //rgba中a是指透明度
+         for(var j = 0;j<10;j++){
+             cxt2.beginPath();
+             cxt2.fillStyle=g2;
+             cxt2.arc(j*25,j*25,j*10,0,2*Math.PI,true);                    //创建弧/曲线（用于创建圆形或部分圆）
+             cxt2.closePath();
+             cxt2.fill();
+             //cxt2.stroke();                                                 //加上此句话后有边框线条出现
+         }
+
+         //渐变图形，径向渐变
+         var canvas3 = document.getElementById("can3");
+         var cxt3 = canvas3.getContext("2d");
+         var g3 = cxt3.createRadialGradient(400,0,0,400,0,400);
+         g3.addColorStop(0,'rgb(255,255,0)');
+         g3.addColorStop(1,'rgb(0,255,255)');
+         cxt3.fillStyle = g3;
+         cxt3.fillRect(0, 0, 400, 350);
+         var n = 0;
+         var g4 = cxt3.createRadialGradient(250,0,0,250,250,300);
+         g4.addColorStop(0.1,'rgba(255,0,0,0.5)');
+         g4.addColorStop(0.7,'rgba(255,255,0,0.5)');
+         g4.addColorStop(1,'rgba(0,0,255,0.5)');      //rgba中a是指透明度
+         for(var j = 0;j<10;j++){
+             cxt3.beginPath();
+             cxt3.fillStyle=g4;
+             cxt3.arc(j*25,j*25,j*10,0,2*Math.PI,true);                    //创建弧/曲线（用于创建圆形或部分圆）
+             cxt3.closePath();
+             cxt3.fill();
+             //cxt3.stroke();                                                 //加上此句话后有边框线条出现
+         }
+     </script>
+</body>
+</html>
