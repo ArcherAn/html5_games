@@ -1,3 +1,14 @@
+## **canvas实现几个基本的画图** ##
+**先上图：**
+
+![](http://i.imgur.com/8RPmHZ7.png)
+
+**canvas画图基本步骤：**<br>
+1、var canvas = document.getElementById("can");var cxt = canvas.getContext("2d");<br>
+2、 cxt.beginPath();                //起始一条路径<br>
+3、 如果需要一次性画多个线段或多个图形，则需要调用beginPath()、closePath()、然后是fill()、如果需要出现边框线条，则结尾出需加上stroke()。
+
+具体代码实现见 canvas_plot.html 所示。
 
 ## **canvas实现鼠标拖拽画正多边形** ##
 **先上图：**
@@ -8,9 +19,9 @@
 - 在页面数字输入框中输入多边形的边数，以及起始的角度 [0 - 360] 。<br>
 - Erase All 按钮点击可以清除画布内容。<br>
 
-**1、**此效果中用到了canvas 中的 getImageData 和 putImageData 方法：getImageData(x,y,width,height)  复制画布上指定矩形的像素数据， putImageData(data,x,y,w,h) 恢复数据。<br>
-**2、**鼠标按下时，利用  getImageData 先保存画布数据。 鼠标 move时，先用 putImageData 恢复数据。这样就能保证画布上已经画好的图一直存在。<br>
-**3、**鼠标 move时，多边形的大小根据鼠标移动的距离变化，主要是在 onmousemove 事件中获取到鼠标距离，这个距离就是多边形的半径。<br>
+**1、**此效果中用到了canvas 中的 **getImageData** 和 **putImageData** 方法：**getImageData(x,y,width,height)**  复制画布上指定矩形的像素数据， **putImageData(data,x,y,w,h)** 恢复数据。<br>
+**2、**鼠标按下时，利用  **getImageData** 先保存画布数据。 鼠标 move时，先用 **putImageData** 恢复数据。这样就能保证画布上已经画好的图一直存在。<br>
+**3、**鼠标 move时，多边形的大小根据鼠标移动的距离变化，主要是在 **onmousemove** 事件中获取到鼠标距离，这个距离就是多边形的半径。<br>
 
 具体代码实现见 canvas_learn.html 所示。
 
