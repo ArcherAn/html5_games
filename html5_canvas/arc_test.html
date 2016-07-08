@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>canvas画圆，五角星</title>
+</head>
+<body>
+     <canvas id="can1" height="300px" width="400px" style="background: black"></canvas>
+     <canvas id="can2" height="300px" width="400px" style="background: wheat"></canvas>
+     <script>
+         window.onload=function(){
+             var can1 = document.getElementById("can1");
+             var ctx1 = can1.getContext("2d");
+             init();
+             draw("can2");
+             function init(){
+                 can1.onclick=function(e){
+                     e = e || window.event;
+                     var x = e.offsetX || e.layerX;
+                     var y = e.offsetY || e.layerY;
+                         ctx1.beginPath();
+                         ctx1.fillStyle='rgb('+parseInt(((Math.random()*256)))+','+parseInt(((Math.random()*256)))+','+parseInt(((Math.random()*256)))+')';
+                         ctx1.arc(x,y,20,0,2*Math.PI,true);                    //创建弧/曲线（用于创建圆形或部分圆）
+                         ctx1.closePath();
+                         ctx1.fill();
+                 }
+             }
+
+             function draw(id){
+                 var canvas = document.getElementById(id);
+                 if(canvas == null)
+                    return false;
+                 var context = canvas.getContext("2d");
+                 context.fillStyle = "#EEEEFF";
+                 context.fillRect(0,0,400,300);
+                 context.shadowOffsetX = 10;
+                 context.shadowOffsetY = 10;
+                 context.shadowColor = 'rgba(100,100,100,0.5)';
+                 context.shadowBlur = 7.5;
+                 //图形绘制
+                 context.translate(0,50);
+                 for(var i = 0;i<3; i++){
+                     context.translate(50,50);
+                     create5Star(context);
+                     context.fill();
+                 }
+             }
+             function create5Star(context){
+                 var n = 0;
+                 var dx = 100;
+                 var dy = 0;
+                 var s = 50;
+                 //创建路径
+                 context.beginPath();
+                 context.fillStyle = 'rgba(255,0,0,0.5)';
+                 var x = Math.sin(0);
+                 var y = Math.cos(0);
+                 var dig = Math.PI/5 * 4;
+                 for(var i=0;i<5;i++){
+                     var x = Math.sin(i*dig);
+                     var y = Math.cos(i*dig);
+                     context.lineTo(dx+x*s,dy+y*s);
+                 }
+                 context.closePath();
+             }
+         }
+     </script>
+
+</body>
+</html>
