@@ -27,6 +27,17 @@
 
 具体代码实现见 canvas_clock.html 所示。
 
+## **获取画布上任意一点的坐标位置** ##
+**如图：**
+
+![](http://i.imgur.com/dRvL0kC.png)
+
+
+该应用程序向**canvas**注册了一个**mousemove**事件鼠标监听器，然后，等到浏览器回调这个监听器时，应用程序会将相对于窗口的鼠标坐标转换为**canvas**坐标。转换工作通过**windowToCanvas()**方法完成。<br>
+**windowToCanvas()**方法在**canvas**对象上调用**getBoundingClientRect()**方法，来获取**canvas**元素的边界框**(bounding box**),该边界匡的坐标是相对于整个窗口的。然后，**windowToCanvas()**方法返回了一个对象，其x与y属性分别对应于鼠标在**canvas**之中的坐标。<br>
+**windowToCanvas()**方法不只将canvas边界框的x\y坐标从窗口坐标中减去，而且在**canvas**元素大小与绘图表面大小不符时，它还对这两个坐标进行了缩放。
+
+具体代码实现见 canvas_spritesheet.html 所示。
 ## **canvas实现鼠标拖拽画正多边形** ##
 **先上图：**
 
