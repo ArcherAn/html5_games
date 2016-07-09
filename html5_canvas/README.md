@@ -38,6 +38,15 @@
 **windowToCanvas()**方法不只将canvas边界框的x\y坐标从窗口坐标中减去，而且在**canvas**元素大小与绘图表面大小不符时，它还对这两个坐标进行了缩放。
 
 具体代码实现见 canvas_spritesheet.html 所示。
+
+## **在canvas中使用HTML元素并实现多圆碰撞** ##
+**如图：**
+![](http://i.imgur.com/SfIS6o6.png)
+
+注：一般而言，采用绝对定位方式的元素将被绘制在采用相对定位方式的元素之上。
+
+
+具体代码实现见 bouncing_balls.html 所示。
 ## **canvas实现鼠标拖拽画正多边形** ##
 **先上图：**
 
