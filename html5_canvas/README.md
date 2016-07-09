@@ -54,13 +54,14 @@
 
 ![原图](http://i.imgur.com/TGV4sIU.png)
 
-![拉伸后](http://i.imgur.com/kLC1AUn.png)
+![拉伸后](http://i.imgur.com/kLC1AUn.png)A
 
 上面的图片为原图片与拉伸后的图片<br>
-canvas的onmousedown时间处理器在被触发时会调用rubberbandStart()方法，该方法会将DIV元素的左上角移动到鼠标按下的地方，并使DIV元素可见。由于代表橡皮筋式选取框的这个DIV元素，其CSS中的position的值是absolute，所以在指定其左上角坐标时，必须指定相对于窗口的坐标，而不是相对于canvas的坐标。<br>
-如果用户拖动鼠标，那么onmousemove时间处理器就会调用rubberbandStretch()方法，该方法会对代表橡皮筋选取框的这个DIV元素进行移动与缩放操作。<br>
-当用户松开鼠标时，onmouseup事件处理器就会调用rubberbandEnd() 方法，该方法会把选中的部分图像放大，并绘制出来，同时将表示橡皮筋选取框的那个DIV元素隐藏起来。<br>
-注意：以上三个鼠标事件处理器都会在传入的事件对象上调用preventDefault()方法，可以防止浏览器对鼠标事件做出默认的反应。
+
+**canvas**的**onmousedown**时间处理器在被触发时会调用**rubberbandStart()**方法，该方法会将DIV元素的左上角移动到鼠标按下的地方，并使DIV元素可见。由于代表橡皮筋式选取框的这个DIV元素，其CSS中的**position**的值是**absolute**，所以在指定其左上角坐标时，必须指定相对于窗口的坐标，而不是相对于**canvas**的坐标。<br>
+如果用户拖动鼠标，那么**onmousemove**时间处理器就会调用**rubberbandStretch()**方法，该方法会对代表橡皮筋选取框的这个DIV元素进行移动与缩放操作。<br>
+当用户松开鼠标时，**onmouseup**事件处理器就会调用**rubberbandEnd()** 方法，该方法会把选中的部分图像放大，并绘制出来，同时将表示橡皮筋选取框的那个DIV元素隐藏起来。<br>
+注意：以上三个鼠标事件处理器都会在传入的事件对象上调用**preventDefault()**方法，可以防止浏览器对鼠标事件做出默认的反应。
 
 具体代码实现见 rubber_bands.html 所示。
 ## **canvas实现鼠标拖拽画正多边形** ##
