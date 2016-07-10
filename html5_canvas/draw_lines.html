@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>Drawing Lines with Rubber Bands</title>
+    <style>
+        body {
+            background: #eeeeee;
+        }
+
+        #controls {
+            position: absolute;
+            left: 25px;
+            top: 25px;
+        }
+
+        #canvas {
+            background: #ffffff;
+            cursor: pointer;
+            margin-left: 10px;
+            margin-top: 10px;
+            -webkit-box-shadow: 4px 4px 8px rgba(0,0,0,0.5);
+            -moz-box-shadow: 4px 4px 8px rgba(0,0,0,0.5);
+            box-shadow: 4px 4px 8px rgba(0,0,0,0.5);
+        }
+    </style>
+</head>
+<body>
+<canvas id='canvas' width='600' height='400'>
+    Canvas not supported
+</canvas>
+
+<div id='controls'>
+    Stroke color: <select id='strokeStyleSelect'>
+    <option value='red'>red</option>
+    <option value='green'>green</option>
+    <option value='blue'>blue</option>
+    <option value='orange'>orange</option>
+    <option value='cornflowerblue' selected>cornflowerblue</option>
+    <option value='goldenrod'>goldenrod</option>
+    <option value='navy'>navy</option>
+    <option value='purple'>purple</option>
+</select>
+    Guidewires: <input id='guidewireCheckbox' type='checkbox' checked/>
+    <input id='eraseAllButton' type='button' value='Erase all'/>
+</div>
+<script>
+    var canvas = document.getElementById('canvas'),
+            context = canvas.getContext('2d'),
+            eraseAllButton = document.getElementById('eraseAllButton'),
+            strokeStyleSelect = document.getElementById('strokeStyleSelect'),
+            guidewireCheckbox = document.getElementById('guidewireCheckbox'),
+            drawingSurfaceImageData,
+            mousedown = {},                    //记录鼠标按下的位置
+            rubberbandRect = {},              //橡皮筋矩形框
+            dragging = false,                 //记录鼠标是否在拖动状态
+            guidewires = guidewireCheckbox.checked;
+
+    // Functions..........................................................
+
+    function drawGrid(color, stepx, stepy) {
+        context.save()
+
+        context.strokeStyle = color;
+        context.lineWidth = 0.5;
+        context.clearRect(0, 0, context.canvas.width, context.canvas.height);
+
+        for (var i = stepx + 0.5; i < context.canvas.width; i += stepx) {
+            context.beginPath();
+            context.moveTo(i, 0);
+            context.lineTo(i, context.canvas.height);
+            context.stroke();
+        }
+
+        for (var i = stepy + 0.5; i < context.canvas.height; i += stepy) {
+            context.beginPath();
+            context.moveTo(0, i);
+            context.lineTo(context.canvas.width, i);
+            context.stroke();
+        }
+
+        context.restore();
+    }
+
+    function windowToCanvas(x, y) {                          //窗口坐标转canvas坐标.........
+        var bbox = canvas.getBoundingClientRect();
+        return { x: x - bbox.left * (canvas.width  / bbox.width),
+            y: y - bbox.top  * (canvas.height / bbox.height) };
+    }
+
+    // Save and restore drawing surface...................................
+
+    function saveDrawingSurface() {                        // 保存已绘制的画面...................................
+        drawingSurfaceImageData = context.getImageData(0, 0,
+                canvas.width,
+                canvas.height);
+    }
+
+    function restoreDrawingSurface() {                    // 恢复已绘制的画面...................................
+        context.putImageData(drawingSurfaceImageData, 0, 0);
+    }
+
+    // Rubberbands........................................................
+
+    function updateRubberbandRectangle(loc) {                   //更新橡皮筋矩形框...........
+        rubberbandRect.width  = Math.abs(loc.x - mousedown.x);
+        rubberbandRect.height = Math.abs(loc.y - mousedown.y);
+
+        if (loc.x > mousedown.x) rubberbandRect.left = mousedown.x;
+        else                     rubberbandRect.left = loc.x;
+
+        if (loc.y > mousedown.y) rubberbandRect.top = mousedown.y;
+        else                     rubberbandRect.top = loc.y;
+
+
+    }
+
+    function drawRubberbandShape(loc) {                       //画橡皮筋矩形框的形状
+        context.beginPath();
+        context.moveTo(mousedown.x, mousedown.y);
+        context.lineTo(loc.x, loc.y);
+        context.stroke();
+    }
+
+    function updateRubberband(loc) {                      //更新橡皮筋
+        updateRubberbandRectangle(loc);
+        drawRubberbandShape(loc);
+    }
+
+    // Guidewires.........................................................
+    /*
+    function drawHorizontalLine (y) {
+        context.beginPath();
+        context.moveTo(0,y+0.5);
+        context.lineTo(context.canvas.width,y+0.5);
+        context.stroke();
+    }
+
+    function drawVerticalLine (x) {
+        context.beginPath();
+        context.moveTo(x+0.5,0);
+        context.lineTo(x+0.5,context.canvas.height);
+        context.stroke();
+    }
+
+    function drawGuidewires(x, y) {
+        context.save();
+        context.strokeStyle = 'rgba(0,0,230,0.4)';
+        context.lineWidth = 0.5;
+        drawVerticalLine(x);
+        drawHorizontalLine(y);
+        context.restore();
+    }
+    */
+
+    // Canvas event handlers..............................................
+
+    canvas.onmousedown = function (e) {
+        var loc = windowToCanvas(e.clientX, e.clientY);                 //先获取鼠标点击下的canvas坐标
+
+        e.preventDefault(); // prevent cursor change
+
+        saveDrawingSurface();                                             //先保存之前画布上的数据
+        mousedown.x = loc.x;
+        mousedown.y = loc.y;
+        dragging = true;
+    };
+
+    canvas.onmousemove = function (e) {
+        var loc;
+
+        if (dragging) {
+            e.preventDefault();                       // prevent selections
+
+            loc = windowToCanvas(e.clientX, e.clientY);
+            restoreDrawingSurface();
+            updateRubberband(loc);
+            /*
+            if(guidewires) {
+                drawGuidewires(loc.x, loc.y);
+            }
+            */
+        }
+    };
+
+    canvas.onmouseup = function (e) {
+        loc = windowToCanvas(e.clientX, e.clientY);
+        restoreDrawingSurface();
+        updateRubberband(loc);
+        dragging = false;
+    };
+
+    // Controls event handlers.......................................
+
+    eraseAllButton.onclick = function (e) {
+        context.clearRect(0, 0, canvas.width, canvas.height);
+        drawGrid('lightgray', 10, 10);
+        saveDrawingSurface();
+    };
+
+    strokeStyleSelect.onchange = function (e) {
+        context.strokeStyle = strokeStyleSelect.value;
+    };
+
+    guidewireCheckbox.onchange = function (e) {
+        guidewires = guidewireCheckbox.checked;
+    };
+
+    // Initialization................................................
+
+    context.strokeStyle = strokeStyleSelect.value;
+    drawGrid('lightgray', 10, 10);
+
+</script>
+</body>
+</html>
