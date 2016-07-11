@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>在画布上画图并实现缩放</title>
+    <style>
+        body{
+            background: rgba(100,145,250,0.3);
+        }
+        #canvas{
+            margin-left: 20px;
+            margin-right: 0;
+            margin-bottom: 20px;
+            cursor: crosshair;
+            border: 1px solid #aaaaaa;
+        }
+        #controls{
+            margin: 15px;
+            padding: 0;
+        }
+    </style>
+</head>
+<body>
+<div id="controls">
+<input  id="scaleCheckbox" type="checkbox"/>Scale image to canvas
+</div>
+<canvas id="canvas" width="900px" height="700px"></canvas>
+<script>
+    var canvas = document.getElementById("canvas");
+    var context = canvas.getContext("2d");
+    var scaleCheckbox = document.getElementById("scaleCheckbox");
+    var image = new Image();
+    function drawImage(){
+        context.clearRect(0,0,canvas.width,canvas.height);
+        if(scaleCheckbox.checked){
+            context.drawImage(image,0,0,canvas.width,canvas.height);
+        }else{
+            context.drawImage(image,0,0);
+        }
+        context.restore();
+    }
+    scaleCheckbox.onchange = function(e){
+        drawImage();
+    }
+    image.src = 'waterfall.png';
+    image.onload = function(e){
+        drawImage();
+    }
+</script>
+</body>
+</html>
