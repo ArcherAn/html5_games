@@ -34,6 +34,7 @@
            context = canvas.getContext('2d'),
            paused = true,
            discs = [];
+       var lastTime = 0;
        for (var i=0; i < 20; ++i) {                 //定义100个圆的属性
            discs[i] = {
                x: 100,
@@ -85,16 +86,26 @@
 
            }
        }
+       function calculateFps(){
+           var now = (+new Date()),
+               fps = 1000/(now-lastTime);
+           lastTime = now;
+           return fps;
+       }
        // Animation.....................................................
        function animate(time) {
            if (!paused) {
                context.clearRect(0,0,canvas.width,canvas.height);
                update();
                draw();
+
+               context.fillStyle = 'cornflowerblue';
+               context.fillText(calculateFps().toFixed() + ' fps', 45, 50);
                window.requestNextAnimationFrame(animate);
            }
        }
        // Initialization................................................
+       context.font = '48px Helvetica';
        animateButton.onclick = function (e) {
            paused = paused ? false : true;
            if (paused) {
