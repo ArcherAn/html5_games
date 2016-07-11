@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+    <style>
+        body {
+            background: #dddddd;
+        }
+        #canvas {
+            background: #ffffff;
+            cursor: pointer;
+            margin-left: 10px;
+            margin-top: 10px;
+            -webkit-box-shadow: 3px 3px 6px rgba(0,0,0,0.5);
+            -moz-box-shadow: 3px 3px 6px rgba(0,0,0,0.5);
+            box-shadow: 3px 3px 6px rgba(0,0,0,0.5);
+        }
+
+        #controls {
+            margin-top: 10px;
+            margin-left: 15px;
+        }
+    </style>
+</head>
+<body>
+   <div id="controls">
+       <input id="animateButton" type='button' value="Animate"/>
+   </div>
+   <canvas id="canvas" width="750" height="500"></canvas>
+   <script src='requestNextAnimationFrame.js'></script>
+   <script>
+       var canvas = document.getElementById('canvas'),
+           context = canvas.getContext('2d'),
+           paused = true,
+           discs = [];
+       for (var i=0; i < 20; ++i) {                 //定义100个圆的属性
+           discs[i] = {
+               x: 100,
+               y: 100,
+               velocityX: 3*Math.random(),
+               velocityY: 3*Math.random(),
+               radius: 50*Math.random(),
+               color: 'rgba(' + (Math.random()*255).toFixed(0) + ', ' +
+               (Math.random()*255).toFixed(0) + ', ' +
+               (Math.random()*255).toFixed(0) + ', 1.0)' };
+       }
+           var numDiscs = discs.length;
+           var animateButton = document.getElementById('animateButton');
+
+
+
+
+       function update() {
+           var disc = null;
+
+           for(var i=0; i < numDiscs; ++i) {
+               disc = discs[i];
+
+               if (disc.x + disc.velocityX + disc.radius > context.canvas.width ||
+                       disc.x + disc.velocityX - disc.radius < 0)
+                   disc.velocityX = -disc.velocityX;
+
+               if (disc.y + disc.velocityY + disc.radius > context.canvas.height ||
+                       disc.y + disc.velocityY - disc.radius  < 0)
+                   disc.velocityY= -disc.velocityY;
+
+               disc.x += disc.velocityX;
+               disc.y += disc.velocityY;
+           }
+       }
+       function draw() {
+           var disc = discs[i];
+
+           for(var i=0; i < numDiscs; ++i) {
+               disc = discs[i];
+
+               context.save();
+               context.beginPath();
+               context.arc(disc.x, disc.y, disc.radius, 0, Math.PI*2, false);
+               context.fillStyle = disc.color;
+               context.fill();
+               context.stroke();
+               context.restore();
+
+           }
+       }
+       // Animation.....................................................
+       function animate(time) {
+           if (!paused) {
+               context.clearRect(0,0,canvas.width,canvas.height);
+               update();
+               draw();
+               window.requestNextAnimationFrame(animate);
+           }
+       }
+       // Initialization................................................
+       animateButton.onclick = function (e) {
+           paused = paused ? false : true;
+           if (paused) {
+               animateButton.value = 'Animate';
+           }
+           else {
+               window.requestNextAnimationFrame(animate);
+               animateButton.value = 'Pause';
+           }
+       };
+   </script>
+</body>
+</html>
