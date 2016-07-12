@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>基于时间的动画行为</title>
+    <style>
+        body {
+            background: #eeeeee;
+        }
+
+        #thrustersCanvas {
+            background: rgba(255,255,255,0.4);
+            position: absolute;
+            left: 137px;
+            top: 170px;
+            border: thin solid rgba(0,0,0,1.0);
+            -webkit-box-shadow: rgba(0,0,0,0.5) 4px 4px 6px;
+            -moz-box-shadow: rgba(0,0,0,0.5) 4px 4px 6px;
+            box-shadow: rgba(0,0,0,0.5) 4px 4px 6px;
+        }
+
+        #canvas {
+            position: absolute;
+            left: 0px;
+            top: 20px;
+            margin-left: 20px;
+            background: lightskyblue;
+            border: thin solid rgba(0,0,0,1.0);
+            -webkit-box-shadow: rgba(0,0,0,0.5) 4px 4px 6px;
+            -moz-box-shadow: rgba(0,0,0,0.5) 4px 4px 6px;
+            box-shadow: rgba(0,0,0,0.5) 4px 4px 6px;
+        }
+    </style>
+</head>
+<body>
+<canvas id="canvas" width="350" height="300">
+    Canvas not supported
+</canvas>
+
+<div id='thrustersDiv'>
+    <canvas id='thrustersCanvas' width='110' height='50'>
+        canvas not supported
+    </canvas>
+    <script src='requestNextAnimationFrame.js'></script>
+    <script src='sprites.js'></script>
+    <script src='animationTimer.js'></script>
+    <script src='stopwatch.js'></script>
+    <script>
+        var canvas = document.getElementById('canvas'),
+             context = canvas.getContext('2d'),
+
+             thrustersCanvas = document.getElementById('thrustersCanvas'),
+             thrustersContext = thrustersCanvas.getContext('2d'),
+
+             RIGHT = 1,
+             LEFT = 2,
+             ARROW_MARGIN = 10,                       // 定义箭头边距
+             BALL_RADIUS  = 15,                       // 定义球的半径
+             LEDGE_LEFT   = 150,                      // 定义球下面底板的位置
+             LEDGE_TOP    = 90,
+             LEDGE_WIDTH  = 44,                       // 定义底板的宽度和高度
+             LEDGE_HEIGHT = 12,
+             ANIMATION_DURATION = 200,               // 定义一帧动画所花费的时间
+
+             THRUSTER_FILL_STYLE = 'rgba(100,140,230,0.8)',
+             THRUSTER_FIRING_FILL_STYLE = 'rgba(255,255,0,0.8)',
+
+             lastTime = 0,
+             arrow = LEFT,                         // 定义向左向右按钮
+
+             // Push animation...........................................
+             pushTimer = new AnimationTimer(ANIMATION_DURATION),      // 定义一个动画定时器对象
+
+             // Move ball behavior........................................
+
+            moveBall = {                       // 定义球的移动行为
+                lastTime: undefined,
+
+                resetBall: function () {                                                 // 重置球的位置
+                    ball.left = LEDGE_LEFT + LEDGE_WIDTH/2 - BALL_RADIUS;           // 150 + 22 - 15 = 157 球的左边界
+                    ball.top  = LEDGE_TOP - BALL_RADIUS*2;                            // 球的上边界
+                },
+
+                execute: function (sprite, context, time) {
+                    var timerElapsed = pushTimer.getElapsedTime(),                     // 定义动画时间
+                            frameElapsed;
+
+                    if (pushTimer.isRunning() && this.lastTime !== undefined) {
+                        frameElapsed = timerElapsed - this.lastTime;
+
+                        if (arrow === LEFT) ball.left -= ball.velocityX * (frameElapsed/1000);    // 如果向左，则改变球左边界位置
+                        else                ball.left += ball.velocityX * (frameElapsed/1000);
+
+                        if ((isBallOnLedge() && pushTimer.isOver()) || ! isBallOnLedge())     // 如果满足此条件，则终止动画
+                            pushTimer.stop();
+
+                        if ( ! isBallOnLedge())                                                 // 如果球不在地板上，则重置球的位置
+                            this.resetBall();
+                    }
+                    this.lastTime = timerElapsed;
+                }
+            },
+
+        // Ball sprite...............................................
+
+        ball = new Sprite('ball',                                                    // 定义一个球类精灵，重写sprites.js中的对象
+                {
+                    paint: function (sprite, context) {
+                        context.save();                                               // 分别画出两个大圆与小圆
+                        context.beginPath();
+                        context.arc(sprite.left + sprite.width/2, sprite.top + sprite.height/2,
+                                BALL_RADIUS, 0, Math.PI*2, false);
+                        context.clip();
+
+                        context.shadowColor = 'rgb(0,0,255)';
+                        context.shadowOffsetX = -4;
+                        context.shadowOffsetY = -4;
+                        context.shadowBlur = 8;
+
+                        context.lineWidth = 2;
+                        context.strokeStyle = 'rgb(100,100,195)';
+                        context.stroke();
+
+                        context.beginPath();
+                        context.arc(sprite.left + sprite.width/2, sprite.top + sprite.height/2,
+                                BALL_RADIUS/2, 0, Math.PI*2, false);
+                        context.clip();
+
+                        context.shadowColor = 'rgb(255,255,0)';
+                        context.shadowOffsetX = -4;
+                        context.shadowOffsetY = -4;
+                        context.shadowBlur = 8;
+                        context.stroke();
+
+                        context.restore();
+                    }
+                },
+
+                [ moveBall ]
+        ),
+
+        ledge = new Sprite('ledge',                               // 定义下面的底板并将其画出，注：底板没有任何行为，是静止的
+                {
+                    paint: function (sprite, context) {
+                        context.save();
+                        context.shadowColor = 'rgba(0,0,0,0.8)';
+                        context.shadowBlur = 8;
+                        context.shadowOffsetX = 4;
+                        context.shadowOffsetY = 4;
+
+                        context.fillStyle = 'rgba(255,255,0,0.6)';
+                        context.fillRect(sprite.left,sprite.top,
+                                sprite.width,sprite.height);
+                        context.restore();
+                    }
+                }
+        );
+
+        // Behavior functions............................................
+
+        function restartAnimation() {                           // 重新开始动画
+            if (pushTimer.isRunning()) {
+                pushTimer.stop();
+            }
+            pushTimer.start();
+        }
+
+        function pushBallLeft() {                            // 将球推向左边
+            arrow = LEFT;
+            restartAnimation();
+        }
+
+        function pushBallRight() {                           // 将球推向右边
+            arrow = RIGHT;
+            restartAnimation();
+        }
+
+        function isBallOnLedge() {                         // 判断球是否在下面的底板上（结合图示就知道了）
+            return ball.left + 2*BALL_RADIUS > LEDGE_LEFT &&
+                    ball.left < LEDGE_LEFT + LEDGE_WIDTH;
+        }
+
+        // Paint functions...............................................
+
+        function paintThrusters() {                                 // 画下面两个三角形左右按钮
+            thrustersContext.clearRect(0,0,
+                    thrustersCanvas.width,thrustersCanvas.height);
+
+            if (arrow === LEFT) {
+                thrustersContext.fillStyle =                   // 如果按钮正在点击，即动画正在运行时颜色是黄色，否则为蓝色
+                        pushTimer.isRunning() ? THRUSTER_FIRING_FILL_STYLE :
+                                THRUSTER_FILL_STYLE;
+                paintLeftArrow(thrustersContext);               // 画出左边的按钮
+                thrustersContext.fillStyle = THRUSTER_FILL_STYLE;
+                paintRightArrow(thrustersContext);            // 画出右边的按钮
+            }
+            else {
+                thrustersContext.fillStyle =                 // 如果按钮正在点击，即动画正在运行时颜色是黄色，否则为蓝色
+                        pushTimer.isRunning() ? THRUSTER_FIRING_FILL_STYLE :
+                                THRUSTER_FILL_STYLE;
+                paintRightArrow(thrustersContext);             // 画出右边的按钮
+                thrustersContext.fillStyle = THRUSTER_FILL_STYLE;
+                paintLeftArrow(thrustersContext);              // 画出左边的按钮
+            }
+        }
+
+        function paintRightArrow(context) {                    // 画右边按钮时以左边按钮为基础，进行坐标系平移和按钮旋转
+            thrustersContext.save();
+            thrustersContext.translate(thrustersCanvas.width, 0);
+            thrustersContext.scale(-1,1);
+            paintArrow(context);
+            thrustersContext.restore();
+        }
+
+        function paintLeftArrow(context) {
+            paintArrow(context);
+        }
+
+        function paintArrow(context) {                      // 画左边按钮 （默认）
+            context.beginPath();
+
+            context.moveTo( thrustersCanvas.width/2 - ARROW_MARGIN/2,
+                    ARROW_MARGIN/2);
+
+            context.lineTo( thrustersCanvas.width/2 - ARROW_MARGIN/2,
+                    thrustersCanvas.height - ARROW_MARGIN);
+
+            context.quadraticCurveTo(thrustersCanvas.width/2 - ARROW_MARGIN/2,
+                    thrustersCanvas.height - ARROW_MARGIN/2,
+                    thrustersCanvas.width/2 - ARROW_MARGIN,
+                    thrustersCanvas.height - ARROW_MARGIN/2);
+
+            context.lineTo( ARROW_MARGIN,
+                    thrustersCanvas.height/2 + ARROW_MARGIN/2);
+
+            context.quadraticCurveTo(ARROW_MARGIN - 3,
+                    thrustersCanvas.height/2,
+                    ARROW_MARGIN, thrustersCanvas.height/2 - ARROW_MARGIN/2);
+
+            context.lineTo( thrustersCanvas.width/2 - ARROW_MARGIN,
+                    ARROW_MARGIN/2);
+
+            context.quadraticCurveTo(thrustersCanvas.width/2 - ARROW_MARGIN,
+                    ARROW_MARGIN/2, thrustersCanvas.width/2 - ARROW_MARGIN/2,
+                    ARROW_MARGIN/2);
+            context.fill();
+            context.stroke();
+        }
+
+        // Event handlers................................................
+
+        thrustersCanvas.onmousedown = function canvasMouseDown(e) {          //鼠标按下事件
+            var rect = thrustersCanvas.getBoundingClientRect(),   // getBoundingClientRect()方法返回了一个矩形对象，包含四个属性 left、top、right、bottom
+                    x = e.x || e.clientX,                          //获取鼠标的位置
+                    y = e.y || e.clientY;
+
+            e.preventDefault();                                   // 阻止浏览器的默认事件
+            e.stopPropagation();                                  // 停止事件的传播
+
+            if (x-rect.left > thrustersCanvas.width/2) {      // 如果判断出鼠标点击的是右边的三角形，则触发右边的事件
+                pushBallRight();
+            }
+            else {
+                pushBallLeft();
+            }
+        };
+
+        // Animation functions...........................................
+
+        function calculateFps(time) {
+            var fps = 1000 / (time - lastTime);
+            lastTime = time;
+            return fps;
+        }
+
+        function animate(time) {
+            //fps = calculateFps(time);              //  可以省略
+
+            context.clearRect(0,0,canvas.width,canvas.height);
+
+            ball.update(context, time);         // 更新
+            ball.paint(context);
+
+            ledge.update(context, time);         // 因为底板是静止的，所以此句可以省略
+            ledge.paint(context);
+
+            paintThrusters();                    // 画出下面的底板
+
+            window.requestNextAnimationFrame(animate);
+        }
+
+        // Initialization................................................
+
+        thrustersContext.strokeStyle = 'rgba(100,140,230,0.6)';    // 底板的颜色及阴影配置
+        thrustersContext.shadowColor = 'rgba(0,0,0,0.3)';
+        thrustersContext.shadowBlur = 6;
+        thrustersContext.shadowX = 4;
+        thrustersContext.shadowY = 4;
+
+        window.requestNextAnimationFrame(animate);
+
+        ball.left = LEDGE_LEFT + LEDGE_WIDTH/2 - BALL_RADIUS;       // 定义初始时球所在画布的位置，即左上角的位置
+        ball.top = LEDGE_TOP - BALL_RADIUS*2;
+        ball.width = BALL_RADIUS*2;                     // 定义球的宽度和高度
+        ball.height = BALL_RADIUS*2;
+        ball.velocityX = 110;                            // 定义球沿横向移动的速度 110像素每秒
+        ball.velocityY = 0;
+
+        ledge.left = LEDGE_LEFT;                      // 定义底板的属性
+        ledge.top = LEDGE_TOP;
+        ledge.width = LEDGE_WIDTH;
+
+
+    </script>
+</div>
+</body>
+</html>
